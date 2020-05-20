@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">AnnoyingEx</string>
+    <string name="here_we_go_again">Here we go again...</string>
+    <string name="give_closure">Give Closure</string>
+    <string name="previous_message">Your ex\'s previous message:</string>
+    <string name="channel_name">The_Annoying_Ex</string>
+    <string name="channel_description">The source that haunts your dreams.</string>
 </resources>
