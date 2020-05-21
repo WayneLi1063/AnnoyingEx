@@ -16,8 +16,8 @@ class AnnoyingExApplication : Application() {
         super.onCreate()
 
         apiManager = ApiManager(this)
-        notificationManager = AENotificationManager(this)
         workManager = AEWorkManager(this)
+        notificationManager = AENotificationManager(this)
     }
 
 

@@ -2,51 +2,59 @@ package com.example.annoyingex.manager
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import android.os.Build
-import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.example.annoyingex.AnnoyingExApplication
 import com.example.annoyingex.R
+import com.example.annoyingex.activity.MainActivity
 import kotlin.random.Random
 
 class AENotificationManager(private val context: Context) {
 
     private val notificationManagerCompat = NotificationManagerCompat.from(context)
-    private val apiManager = (context as AnnoyingExApplication).apiManager
-    private lateinit var listOfMessages: List<String>
+    private val application = (context as AnnoyingExApplication)
+    private val apiManager = application.apiManager
+    private val workManager = application.workManager
+    lateinit var listOfMessages: List<String>
 
     companion object {
         const val ANNOYING_EX_CHANNEL_ID = "OOOOOOMMMMMMMMMMGGGGGGGGGG"
+        const val ANNOYING_EX_KEY = "I AM INEVITABLE"
     }
 
     init {
         createAnnoyingEx()
-
-        // TODO: Store Messages in application
         apiManager.getMessages({ messages ->
             listOfMessages = messages.messages
-            Toast.makeText(context, "Successfully fetched messages.", Toast.LENGTH_SHORT).show()
         }, {
             listOfMessages = listOf("unable to retrieve message")
-            Toast.makeText(context, "Error occurred when fetching messages.", Toast.LENGTH_SHORT)
-                .show()
         })
+        workManager.fetchThemMessages()
     }
 
-    // TODO: When a user clicks on the notification, it should launches your MainActivity
-
-    // TODO: when a user launches the MainActivity from the notification, it should display
-    // TODO: the text that was in the message/notification somewhere in the activity.
-
     fun createAnnoyingNotifications() {
+        val chosenOne = listOfMessages[Random.nextInt(0, listOfMessages.size)]
+
+        val intent = Intent(context, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            putExtra(ANNOYING_EX_KEY, chosenOne)
+        }
+
+        val pendingIntent =
+            PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+
+
         val notification = NotificationCompat.Builder(context, ANNOYING_EX_CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_announcement_black_24dp)
             .setContentTitle("The person you hate and love")
-            .setContentText(listOfMessages[Random.nextInt(0, listOfMessages.size)])
+            .setContentText(chosenOne)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setCategory(NotificationCompat.CATEGORY_MESSAGE)
+            .setContentIntent(pendingIntent)
             .setAutoCancel(true)
             .build()
 

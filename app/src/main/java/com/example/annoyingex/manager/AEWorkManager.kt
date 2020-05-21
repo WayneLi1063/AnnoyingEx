@@ -1,11 +1,9 @@
 package com.example.annoyingex.manager
 
 import android.content.Context
-import androidx.work.Constraints
-import androidx.work.PeriodicWorkRequestBuilder
-import androidx.work.WorkInfo
-import androidx.work.WorkManager
-import com.example.annoyingex.SendThemMessagesWorker
+import androidx.work.*
+import com.example.annoyingex.worker.FetchThemMessagesWorker
+import com.example.annoyingex.worker.SendThemMessagesWorker
 import java.util.concurrent.TimeUnit
 
 class AEWorkManager(context: Context) {
@@ -14,6 +12,7 @@ class AEWorkManager(context: Context) {
 
     companion object {
         const val ANNOYING_EX_REQ_TAG = "WHY_ARE_YOU_IGNORING_ME?!!!!"
+        const val FETCH_TAG = "OH BOI HERE WE GO AGAIN"
     }
 
     fun keepsOnSendingThemMessages() {
@@ -30,11 +29,38 @@ class AEWorkManager(context: Context) {
                     .build()
 
             workManager.enqueue(workRequest)
+            // Can alternatively use enqueueUniquePeriodicWork(TAG, ExistingPeriodicWorkPolicy, workRequest)
+            // and ExistingPeriodicWorkPolicy.KEEP to remove the need to call isExSendingThemMessages()
         }
     }
 
-    // TODO: Create another separate worker that runs every 2 days that fetches JSON only when the device’s
-    // TODO: battery is not too low and is connected to a network.
+    fun fetchThemMessages() {
+//      if (isFetchingTaskScheduled()) {
+//          stopFetching()
+//      }
+
+        val constraintsFetch = Constraints.Builder()
+            .setRequiresBatteryNotLow(true)
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .build()
+
+        val workRequestFetch =
+            PeriodicWorkRequestBuilder<FetchThemMessagesWorker>(2, TimeUnit.DAYS)
+                .setInitialDelay(2, TimeUnit.DAYS)
+                .setConstraints(constraintsFetch)
+                .addTag(FETCH_TAG)
+                .build()
+
+//      workManager.enqueue(workRequestFetch)
+
+//      Using alternative method
+        workManager.enqueueUniquePeriodicWork(
+            "Fetch",
+            ExistingPeriodicWorkPolicy.REPLACE,
+            workRequestFetch
+        )
+
+    }
 
     private fun isExSendingThemMessages(): Boolean {
         return when (workManager.getWorkInfosByTag(ANNOYING_EX_REQ_TAG).get().firstOrNull()?.state) {
@@ -44,7 +70,19 @@ class AEWorkManager(context: Context) {
         }
     }
 
+//  private fun isFetchingTaskScheduled(): Boolean {
+//      return when (workManager.getWorkInfosByTag(FETCH_TAG).get().firstOrNull()?.state) {
+//          WorkInfo.State.RUNNING,
+//          WorkInfo.State.ENQUEUED -> true
+//          else -> false
+//      }
+//  }
+
     fun stopSending() {
         workManager.cancelAllWorkByTag(ANNOYING_EX_REQ_TAG)
     }
+
+//  private fun stopFetching() {
+//      workManager.cancelAllWorkByTag(FETCH_TAG)
+//  }
 }
