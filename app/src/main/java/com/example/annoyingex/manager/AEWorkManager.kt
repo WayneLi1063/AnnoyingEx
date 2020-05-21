@@ -70,6 +70,10 @@ class AEWorkManager(context: Context) {
         }
     }
 
+    fun stopSending() {
+        workManager.cancelAllWorkByTag(ANNOYING_EX_REQ_TAG)
+    }
+
 //  private fun isFetchingTaskScheduled(): Boolean {
 //      return when (workManager.getWorkInfosByTag(FETCH_TAG).get().firstOrNull()?.state) {
 //          WorkInfo.State.RUNNING,
@@ -77,10 +81,6 @@ class AEWorkManager(context: Context) {
 //          else -> false
 //      }
 //  }
-
-    fun stopSending() {
-        workManager.cancelAllWorkByTag(ANNOYING_EX_REQ_TAG)
-    }
 
 //  private fun stopFetching() {
 //      workManager.cancelAllWorkByTag(FETCH_TAG)
